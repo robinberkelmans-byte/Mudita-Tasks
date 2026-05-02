@@ -376,6 +376,11 @@
     <input type="text" id="client-id-input" placeholder="xxxxx.apps.googleusercontent.com" autocomplete="off" spellcheck="false" />
   </div>
 
+  <div class="config-field">
+    <label>Client Secret</label>
+    <input type="text" id="client-secret-input" placeholder="GOCSPX-…" autocomplete="off" spellcheck="false" />
+  </div>
+
   <div class="config-actions">
     <button class="config-btn" id="config-cancel-btn">Cancel</button>
     <button class="config-btn primary" id="config-save-btn">Connect →</button>
@@ -432,6 +437,7 @@ const store = {
 };
 
 function getClientId()     { return store.get('clientId'); }
+function getClientSecret() { return store.get('clientSecret'); }
 function getRefreshToken() { return store.get('refreshToken'); }
 function getAccessToken()  { return store.get('accessToken'); }
 function getTokenExpiry()  { return parseInt(store.get('tokenExpiry') || '0'); }
@@ -456,8 +462,9 @@ async function sha256base64url(plain) {
 // ─────────────────────────────────────────────
 // AUTH FLOW
 // ─────────────────────────────────────────────
-async function startAuth(clientId) {
+async function startAuth(clientId, clientSecret) {
   store.set('clientId', clientId);
+  store.set('clientSecret', clientSecret);
   const verifier  = randomBase64(64);
   const challenge = await sha256base64url(verifier);
   store.set('pkce_verifier', verifier);
@@ -478,15 +485,17 @@ async function startAuth(clientId) {
 }
 
 async function handleAuthCallback(code) {
-  const clientId  = getClientId();
-  const verifier  = store.get('pkce_verifier');
-  const redirectUri = store.get('pkce_redirect') || location.href.split('?')[0];
+  const clientId     = getClientId();
+  const clientSecret = getClientSecret();
+  const verifier     = store.get('pkce_verifier');
+  const redirectUri  = store.get('pkce_redirect') || location.href.split('?')[0];
 
   const res = await fetch(TOKEN_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
       client_id:     clientId,
+      client_secret: clientSecret,
       code,
       code_verifier: verifier,
       grant_type:    'authorization_code',
@@ -510,6 +519,7 @@ async function handleAuthCallback(code) {
 
 async function refreshAccessToken() {
   const clientId     = getClientId();
+  const clientSecret = getClientSecret();
   const refreshToken = getRefreshToken();
   if (!clientId || !refreshToken) throw new Error('No credentials');
 
@@ -518,6 +528,7 @@ async function refreshAccessToken() {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
       client_id:     clientId,
+      client_secret: clientSecret,
       refresh_token: refreshToken,
       grant_type:    'refresh_token',
     }),
@@ -661,9 +672,10 @@ document.getElementById('config-cancel-btn').addEventListener('click', () => {
 });
 
 document.getElementById('config-save-btn').addEventListener('click', async () => {
-  const id = document.getElementById('client-id-input').value.trim();
-  if (!id) return;
-  await startAuth(id);
+  const id     = document.getElementById('client-id-input').value.trim();
+  const secret = document.getElementById('client-secret-input').value.trim();
+  if (!id || !secret) return;
+  await startAuth(id, secret);
 });
 
 // ─────────────────────────────────────────────
