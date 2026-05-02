@@ -403,6 +403,9 @@
       placeholder="what needs doing…"
       autocomplete="off"
       spellcheck="false"
+      autofocus
+      inputmode="text"
+      enterkeyhint="send"
     ></textarea>
   </div>
 
@@ -709,11 +712,28 @@ async function init() {
   if (getRefreshToken()) {
     show(appScreen);
     populateLists();
-    taskInput.focus();
+    focusInput();
   } else {
     show(authScreen);
   }
 }
+
+// Robust focus: rAF for next paint, plus a delayed retry.
+// Android TWA / WebView often ignores focus() called too early.
+function focusInput() {
+  requestAnimationFrame(() => {
+    taskInput.focus();
+    // Retry after layout settles — second attempt catches WebView edge cases
+    setTimeout(() => taskInput.focus(), 150);
+  });
+}
+
+// Re-focus when app returns from background
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && appScreen.style.display !== 'none') {
+    focusInput();
+  }
+});
 
 init();
 </script>
