@@ -1,11 +1,11 @@
 {
-  "name": "Mudita Tasks",
-  "short_name": "Mudita",
+  "name": "Tasks",
+  "short_name": "Tasks",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f2ebdc",
-  "theme_color": "#f2ebdc",
+  "background_color": "#FFFFFF",
+  "theme_color": "#FFFFFF",
   "icons": [
     {
       "src": "icon-192.png",
