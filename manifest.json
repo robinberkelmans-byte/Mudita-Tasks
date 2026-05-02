@@ -1,12 +1,11 @@
 {
-  "name": "Add Task",
-  "short_name": "Task",
-  "description": "One-tap Google Tasks entry",
-  "start_url": "/",
+  "name": "Mudita Tasks",
+  "short_name": "Mudita",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#0f0e0c",
-  "theme_color": "#0f0e0c",
-  "orientation": "portrait",
+  "background_color": "#f2ebdc",
+  "theme_color": "#f2ebdc",
   "icons": [
     {
       "src": "icon-192.png",
